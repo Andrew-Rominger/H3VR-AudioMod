@@ -49,6 +49,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Assemblies\Kolibri.Lib.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil.Inject, Version=1.2.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\VapeMod\VapeMod\Assemblies\Mono.Cecil.Inject.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows.Forms">
@@ -76,6 +80,7 @@
     <Content Include="Assemblies\Bass.Net.dll" />
     <Content Include="Assemblies\Kolibri.Lib.dll" />
     <Content Include="Assemblies\Kolibri.Lib.pdb" />
+    <Content Include="Assemblies\Mono.Cecil.Inject.dll" />
     <Content Include="GameAssemblies\Assembly-CSharp-firstpass.dll" />
     <Content Include="GameAssemblies\Assembly-CSharp.dll" />
     <Content Include="GameAssemblies\Put assembly-csharp, assembly-csharp-firstpass, and unityengine assemblies in here.txt" />

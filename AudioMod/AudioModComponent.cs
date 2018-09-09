@@ -5,13 +5,14 @@ using System.Reflection;
 using FistVR;
 using FMOD.Studio;
 using Kolibri.Lib;
+using Mono.Cecil.Inject;
 using UnityEngine;
 
 namespace AudioMod
 {
     public class AudioMod
     {
-        [InjectMethod(typeof(FistVR.TAH_Manager), "BeginGame")]
+        [InjectMethod(typeof(FistVR.TAH_Manager), "BeginGame", injectFlags:InjectFlags.PassInvokingInstance)]
         public static void BeginGameInject(TAH_Manager manager)
         {
             try
@@ -42,7 +43,7 @@ namespace AudioMod
             }
         }
 
-        [InjectMethod(typeof(FVRFMODController), "SwitchTo")]
+        [InjectMethod(typeof(FVRFMODController), "SwitchTo", injectFlags:InjectFlags.PassParametersVal)]
         public static void StartCustomMusic(int musicIndex, float timeDelayStart, bool shouldStop, bool shouldDeadStop)
         {
             try
