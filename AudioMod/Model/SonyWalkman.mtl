@@ -1,0 +1,43 @@
+newmtl Walkman_Back
+Ka 0 0 0
+Kd 0.294118 0.294118 0.294118
+Ks 0.1 0.1 0.1
+Ni 1
+Ns 100
+Tf 1 1 1
+d 1
+map_Kd SB_Front 1.jpg
+map_bump SB_Front 1.jpg
+bump SB_Front 1.jpg
+
+newmtl Walkman_buttons
+Ka 0 0 0
+Kd 0.117647 0.117647 0.117647
+Ks 0.4 0.4 0.4
+Ni 1
+Ns 300
+Tf 1 1 1
+d 1
+
+newmtl Walkman_Front
+Ka 0 0 0
+Kd 0.176471 0.176471 0.176471
+Ks 1 1 1
+Ni 1
+Ns 400
+Tf 1 1 1
+d 1
+map_Kd SB_Front 1.jpg
+map_bump SB_Front 1.jpg
+bump SB_Front 1.jpg
+
+newmtl Walkman_parts
+Ka 0 0 0
+Kd 0.196078 0.196078 0.196078
+Ks 0.4 0.4 0.4
+Ni 1
+Ns 300
+Tf 1 1 1
+d 1
+map_Kd SB_Front 1.jpg
+

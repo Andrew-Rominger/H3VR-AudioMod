@@ -33,8 +33,7 @@
   <ItemGroup>
     <Reference Include="Assembly-CSharp, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Repos\Kolibri\AudioMod\GameAssemblies\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>GameAssemblies\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -73,6 +72,10 @@
     <Compile Include="BassImporter.cs" />
     <Compile Include="ConfigFile.cs" />
     <Compile Include="AudioModComponent.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="MusicController.cs" />
+    <Compile Include="ObjImporter.cs" />
+    <Compile Include="StaticExtensions.cs" />
     <Compile Include="VerySneaky.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -85,12 +88,23 @@
     <Content Include="GameAssemblies\Assembly-CSharp.dll" />
     <Content Include="GameAssemblies\Put assembly-csharp, assembly-csharp-firstpass, and unityengine assemblies in here.txt" />
     <Content Include="GameAssemblies\UnityEngine.dll" />
+    <Content Include="Model\Texture.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Model\SonyWalkman.mtl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Model\SonyWalkman.obj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

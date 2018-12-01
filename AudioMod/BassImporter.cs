@@ -29,25 +29,30 @@ namespace AudioMod
             //Un4seen.Bass.BassNet.Registration ("email", "key");
             if (audioClip != null)
                 AudioClip.Destroy(audioClip);
-
+            
             if (Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
             {
                 sample = Bass.BASS_SampleLoad(filePath, 0, 0, 1, BASSFlag.BASS_SAMPLE_FLOAT);
-
                 BASS_SAMPLE info = Bass.BASS_SampleGetInfo(sample);
-
                 int lengthSamples = (int)(info.length / sizeof(float));
                 audioClip = AudioClip.Create(Path.GetFileNameWithoutExtension(filePath), lengthSamples / info.chans, info.chans, info.freq, false);
                 float[] data = new float[lengthSamples];
                 Bass.BASS_SampleGetData(sample, data);
-
                 audioClip.SetData(data, 0);
+                
                 // free the Sample
                 Bass.BASS_SampleFree(sample);
                 // free BASS
                 Bass.BASS_Free();
 
             }
+            else
+            {
+                File.AppendAllText("Exception.txt", "Init bass failed");
+                throw new Exception(Bass.BASS_ErrorGetCode().ToString());
+            }
+
+            audioClip.name = Path.GetFileName(filePath);
             return audioClip;
         }
 
