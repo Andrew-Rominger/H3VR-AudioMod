@@ -8,11 +8,12 @@ namespace AudioMod
 {
     public static class StaticExtensions
     {
-        public static T RandomItem<T>(this List<T> collection)
-        {
-            return collection.Any() ? collection[Random.Range(0, collection.Count)] : default(T);
-        }
-
+        /// <summary>
+        /// Scales a mesh to be a maximum size in any axis
+        /// </summary>
+        /// <param name="mesh">The mesh to scale</param>
+        /// <param name="max">The max size of this mesh in any axi</param>
+        /// <returns>The mesh after scaling</returns>
         public static Mesh ScaleToMaxSize(this Mesh mesh, float max)
         {
             var baseVertices = mesh.vertices;

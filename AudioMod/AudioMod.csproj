@@ -72,6 +72,9 @@
     <Compile Include="BassImporter.cs" />
     <Compile Include="ConfigFile.cs" />
     <Compile Include="AudioModComponent.cs" />
+    <Compile Include="IMusicPlayer.cs" />
+    <Compile Include="InjectionMethods.cs" />
+    <Compile Include="LocalMusicPlayer.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="MusicController.cs" />
     <Compile Include="ObjImporter.cs" />

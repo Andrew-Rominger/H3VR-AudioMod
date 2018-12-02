@@ -1,13 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace AudioMod
 {
     public static class VerySneaky
     {
+        /// <summary>
+        /// Gets a field from an object using reflection
+        /// </summary>
+        /// <typeparam name="T">The type of the field</typeparam>
+        /// <param name="obj">The object to get field from</param>
+        /// <param name="fieldName">The name of the field</param>
+        /// <returns>The field</returns>
         public static T GetField<T>(this object obj, string fieldName)
         {
             if (obj == null)
