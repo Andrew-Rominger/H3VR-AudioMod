@@ -22,5 +22,17 @@ namespace AudioMod
                 throw new ArgumentNullException(nameof(fieldName));
            return (T) obj.GetType().GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(obj);
         }
+
+        public static void SetField<T>(this object obj, string fieldName, T value)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
+            if (string.IsNullOrEmpty(fieldName))
+                throw new ArgumentNullException(nameof(fieldName));
+            var field = obj.GetType().GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            field?.SetValue(obj, value);
+        }
     }
 }

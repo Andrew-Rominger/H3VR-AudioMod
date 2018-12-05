@@ -23,6 +23,11 @@ namespace AudioMod
             Log($"Exception: {e.Message}\n{e.StackTrace}");
         }
 
+        public static void Log(object obj)
+        {
+            Log(obj.ToString());
+        }
+
         public Logger()
         {
             if (_logFile.Exists)

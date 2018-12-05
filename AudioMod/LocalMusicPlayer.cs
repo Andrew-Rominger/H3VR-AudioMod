@@ -17,9 +17,11 @@ namespace AudioMod
         private readonly TAH_Manager _manager;
         private AudioClip[] _takeMusic;
         private AudioClip[] _holdMusic;
+        private AudioCrossFade _audioCrossFade;
         public LocalMusicPlayer(TAH_Manager manager)
         {
             _manager = manager;
+            _audioCrossFade = _manager.gameObject.GetComponent<AudioCrossFade>();
             LoadMusic();
         }
 
@@ -179,10 +181,16 @@ namespace AudioMod
         /// </summary>
         /// <param name="clips">The collection of clips to select from</param>
         /// <returns>A random audio clip from the passed collection</returns>
-        private static AudioClip GetRandomAudioClip(IEnumerable<AudioClip> clips)
+        private AudioClip GetRandomAudioClip(IEnumerable<AudioClip> clips)
         {
-            var audioClipList = clips.ToList();
-            return audioClipList[Rand.Next(0, audioClipList.ToList().Count)];
+            var audioClips = clips.ToList();
+            if (audioClips.Count > 1)
+            {
+                var audioClipList = audioClips.Where(c => c != _audioCrossFade.CurrentSource.clip).ToList();
+                return audioClipList[Rand.Next(0, audioClipList.ToList().Count)];
+            }
+
+            return audioClips.First();
         }
     }
 }

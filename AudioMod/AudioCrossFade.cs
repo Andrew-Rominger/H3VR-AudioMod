@@ -7,6 +7,9 @@ namespace AudioMod
 {
     //Credit Igor Aherne. Feel free to use as you wish, but mention me in credits :)
     //www.facebook.com/igor.aherne
+
+    //Modified by Andrew Rominger
+
     /// <summary>
     /// Smoothly transitions between AudioClips
     /// </summary>
@@ -14,7 +17,7 @@ namespace AudioMod
     {
         public AudioSource Source0;
         public AudioSource Source1;
-
+        public bool IsSongOver;
         #region internal vars
 
         private bool _source0Playing = true; //is _source0 currently the active AudioSource (plays some sound right now)
@@ -22,6 +25,7 @@ namespace AudioMod
         private Coroutine _zerothSourceFadeRoutine = null;
         private Coroutine _firstSourceFadeRoutine = null;
 
+        private float _currentSourcePlayLength;
         #endregion
 
         #region internal functionality
@@ -40,6 +44,7 @@ namespace AudioMod
 
         void Update()
         {
+            
             //constantly check if our game object doesn't contain audio sources which we are referencing.
             //if the _source0 or _source1 contain obsolete references (most likely 'null'), then we will re-init them:
             if (Source0 == null || Source1 == null)
@@ -52,9 +57,16 @@ namespace AudioMod
                 var sources = attachedSources.Select(c => c as AudioSource).ToArray();
 
                 InitSources(sources);
-            }else if(!IsPlaying)
-                gameObject.transform.parent.gameObject.BroadcastMessage("SongEnd");
-
+            }
+            else if(!IsSongOver)
+            {
+                _currentSourcePlayLength += Time.deltaTime;
+                if (_currentSourcePlayLength >= CurrentSource.clip.length)
+                {
+                    _currentSourcePlayLength = 0f;
+                    IsSongOver = true;
+                }
+            }
         }
 
         //re-establishes references to audio sources on this game object:
@@ -92,18 +104,20 @@ namespace AudioMod
         /// <param name="timeSkip">Number of seconds to skip in the incoming sound.</param>
         public void CrossFade(AudioClip clipToPlay, float maxVolume, float fadingTime, float delayBeforeCrossFade = 0, float timeSkip = 0)
         {
+            IsSongOver = false;
+            _currentSourcePlayLength = 0f;
             StartCoroutine(Fade(clipToPlay, maxVolume, fadingTime, delayBeforeCrossFade, timeSkip));
         }
 
         /// <summary>
-        /// Decreases the currenlty playing AudioSource's volume by .1
+        /// Decreases the currently playing AudioSource's volume by .1
         /// </summary>
         public void VolumeDown()
         {
-            if (CurrentSource.volume >= .1f)
-                CurrentSource.volume -= .1f;
-            else if (CurrentSource.volume > 0f && CurrentSource.volume < .1f)
-                CurrentSource.volume = 0;
+            if (CurrentSource.volume >= .01f)
+                CurrentSource.volume -= .01f;
+            else if (CurrentSource.volume > 0f && CurrentSource.volume < .01f)
+                CurrentSource.volume = 0f;
         }
 
         /// <summary>
@@ -111,9 +125,9 @@ namespace AudioMod
         /// </summary>
         public void VolumeUp()
         {
-            if (CurrentSource.volume <= .9f)
-                CurrentSource.volume += .1f;
-            else if (CurrentSource.volume > .9f && CurrentSource.volume < 1f)
+            if (CurrentSource.volume <= .99f)
+                CurrentSource.volume += .01f;
+            else if (CurrentSource.volume > .99f && CurrentSource.volume < 1f)
                 CurrentSource.volume = 1f;
         }
 
@@ -122,11 +136,11 @@ namespace AudioMod
         /// </summary>
         public AudioSource CurrentSource => _source0Playing ? Source0 : Source1;
 
-        private IEnumerator Fade(AudioClip playMe, float maxVolume, float fadingTime, float delay_before_crossFade = 0, float timeSkip = 0)
+        private IEnumerator Fade(AudioClip playMe, float maxVolume, float fadingTime, float delayBeforeCrossFade = 0, float timeSkip = 0)
         {
-            if (delay_before_crossFade > 0)
+            if (delayBeforeCrossFade > 0)
             {
-                yield return new WaitForSeconds(delay_before_crossFade);
+                yield return new WaitForSeconds(delayBeforeCrossFade);
             }
 
             if (_source0Playing)
@@ -163,6 +177,7 @@ namespace AudioMod
             Source0.clip = playMe;
             Source0.time = timeSkip;
             Source0.Play();
+            
             Source0.volume = 0;
 
             if (_zerothSourceFadeRoutine != null)

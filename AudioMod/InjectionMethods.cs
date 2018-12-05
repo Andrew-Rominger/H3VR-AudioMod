@@ -26,7 +26,7 @@ namespace AudioMod
         {
             try
             {
-                //Because unity sucks, we need to get an instance of an object to use Object.Instantiate
+                //Because unity sucks, we need to get an instance of an object to use Object.Instantiate ????
                 //To get the first instance we create a new GameObject and add a MusicController as a component
                 //Using this component as an "original" instance, we can use Object.Instantiate to spawn in the object
                 var gm = new GameObject();
@@ -50,19 +50,19 @@ namespace AudioMod
         [InjectMethod(typeof(HG_GameManager), nameof(HG_GameManager.StartMusic), MethodInjectionInfo.MethodInjectionLocation.Bottom, InjectFlags.PassInvokingInstance)]
         public static void MeatmasMusic(HG_GameManager manager)
         {
-            //Read config file
-            
-
-            //Create importer for song
-            var musicLoader = manager.gameObject.AddComponent<BassImporter>();
-
-            //Create a list of all the music available in TakeMusic and HoldMusic
-            var music = new List<FileInfo>();
-            music.AddRange(new DirectoryInfo("\\Mods\\AudioMod\\TakeMusic\\").GetFiles());
-            music.AddRange(new DirectoryInfo("\\Mods\\AudioMod\\HoldMusic\\").GetFiles());
-
-            //Set the BattleMusic clip
-            manager.AudSource_BattleMusic.clip = musicLoader.ImportFile(music.First(mf => mf.Name == ConfigFile.Instance.MeatmasSongName).FullName);
+            if (ConfigFile.Instance.MeatmasSongName != null)
+            {
+                Assembly.Load("System.Windows.Forms");
+                //Create importer for song
+                var musicLoader = manager.gameObject.AddComponent<BassImporter>();
+                //Create a list of all the music available in TakeMusic and HoldMusic
+                var music = new List<FileInfo>();
+                music.AddRange(new DirectoryInfo("Mods\\AudioMod\\TakeMusic\\").GetFiles());
+                music.AddRange(new DirectoryInfo("Mods\\AudioMod\\HoldMusic\\").GetFiles());
+                var toPlay = music.First(mf => mf.Name == ConfigFile.Instance.MeatmasSongName);
+                manager.AudSource_BattleMusic.clip = musicLoader.ImportFile(toPlay.FullName);
+                //Set the BattleMusic clip
+            }
         }
 
         /// <summary>
@@ -74,6 +74,7 @@ namespace AudioMod
         {
             try
             {
+                
                 //This is needed for BASS
                 Assembly.Load("System.Windows.Forms");
 
@@ -118,6 +119,30 @@ namespace AudioMod
             {
                 Logger.Log(e);
                 Application.Quit();
+            }
+        }
+
+        [InjectMethod(typeof(TAH_Manager), "InitiateHold", MethodInjectionInfo.MethodInjectionLocation.Top, InjectFlags.PassInvokingInstance)]
+        public static void AdjustDifficulty(TAH_Manager manager)
+        {
+            foreach (var waveDefinition in manager.WaveDefinitions)
+            {
+                waveDefinition.TimeForWave = 5f;
+                waveDefinition.NumBots = 4;
+                waveDefinition.WarmUpToSpawnTime = 2f;
+            }
+        }
+
+        [InjectMethod(typeof(TAH_Manager), "SpawnBot", MethodInjectionInfo.MethodInjectionLocation.Bottom)]
+        public static void GetBotInfo()
+        {
+            if (GM.TAHMaster.State == TAH_Manager.TAHGameState.Holding)
+            {
+                var bot = GM.CurrentSceneSettings.ShotEventReceivers.Last().GetComponent<wwBotWurst>();
+                
+                bot.LastPlaceTargetSeen = GM.CurrentPlayerBody.transform.position;
+                bot.SetField("m_timeSinceTargetSeen", 0f);
+                bot.State = wwBotWurst.BotState.Searching;
             }
         }
     }

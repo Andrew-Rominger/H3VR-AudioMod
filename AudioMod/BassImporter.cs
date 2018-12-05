@@ -8,6 +8,8 @@ namespace AudioMod
     public class BassImporter : MonoBehaviour
     {
         private AudioClip _audioClip;
+        private int sample;
+        
 
         /// <summary>
         /// Imports an mp3 file. Only the start of a file is actually imported.
@@ -25,7 +27,7 @@ namespace AudioMod
             if (Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
             {
                 //Load the file and get information about it
-                var sample = Bass.BASS_SampleLoad(filePath, 0, 0, 1, BASSFlag.BASS_SAMPLE_FLOAT);
+                sample = Bass.BASS_SampleLoad(filePath, 0, 0, 1, BASSFlag.BASS_SAMPLE_FLOAT);
                 var info = Bass.BASS_SampleGetInfo(sample);
                 var lengthSamples = (int)(info.length / sizeof(float));
                 //Create a new AudioClip object
@@ -38,7 +40,6 @@ namespace AudioMod
                 //Free up BASS 
                 Bass.BASS_SampleFree(sample);
                 Bass.BASS_Free();
-                _audioClip.name = Path.GetFileName(filePath);
             }
             else
             {
@@ -46,6 +47,8 @@ namespace AudioMod
                 Logger.Log(Bass.BASS_ErrorGetCode().ToString());
                 Application.Quit();
             }
+
+            _audioClip.name = Path.GetFileName(filePath);
             return _audioClip;
         }
     }

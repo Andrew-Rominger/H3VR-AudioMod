@@ -12,10 +12,19 @@ namespace AudioMod
     {
         public TAH_Manager Manager { get; set; }
         public IMusicPlayer MusicPlayer { get; private set; }
-
+        private AudioCrossFade _audioPlayer;
         public void Init()
         {
             MusicPlayer = new LocalMusicPlayer(Manager);
+            _audioPlayer = Manager.gameObject.GetComponent<AudioCrossFade>();
+        }
+
+        void Update()
+        {
+            if (_audioPlayer.IsSongOver)
+            {
+                SongEnd();
+            }
         }
         /// <summary>
         /// Called by the CrossFader when the current song ends
