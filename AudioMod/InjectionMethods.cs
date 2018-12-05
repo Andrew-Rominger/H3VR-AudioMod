@@ -50,7 +50,7 @@ namespace AudioMod
         [InjectMethod(typeof(HG_GameManager), nameof(HG_GameManager.StartMusic), MethodInjectionInfo.MethodInjectionLocation.Bottom, InjectFlags.PassInvokingInstance)]
         public static void MeatmasMusic(HG_GameManager manager)
         {
-            if (ConfigFile.Instance.MeatmasSongName != null)
+            if (!String.IsNullOrEmpty(ConfigFile.Instance.MeatmasSongName))
             {
                 Assembly.Load("System.Windows.Forms");
                 //Create importer for song
