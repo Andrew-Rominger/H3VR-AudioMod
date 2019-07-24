@@ -44,7 +44,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Repos\Kolibri\AudioMod\Libraries\Bass.Net.dll</HintPath>
     </Reference>
-    <Reference Include="Kolibri.Lib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Kolibri.Lib, Version=0.0.0.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Assemblies\Kolibri.Lib.dll</HintPath>
     </Reference>
@@ -55,7 +55,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows.Forms">
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -65,6 +65,15 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Repos\Kolibri\AudioMod\GameAssemblies\UnityEngine.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.Networking">
+      <HintPath>GameAssemblies\UnityEngine.Networking.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>GameAssemblies\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VR">
+      <HintPath>GameAssemblies\UnityEngine.VR.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
