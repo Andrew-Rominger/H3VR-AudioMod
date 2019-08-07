@@ -20,7 +20,18 @@ namespace AudioMod
             }
             if(string.IsNullOrEmpty(fieldName))
                 throw new ArgumentNullException(nameof(fieldName));
-           return (T) obj.GetType().GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(obj);
+            return (T) obj.GetType().GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(obj);
+        }
+
+        public static T GetProperty<T>(this object obj, string propertyName)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
+            if(string.IsNullOrEmpty(propertyName))
+                throw new ArgumentNullException(nameof(propertyName));
+            return (T) obj.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(obj, null);
         }
 
         public static void SetField<T>(this object obj, string fieldName, T value)

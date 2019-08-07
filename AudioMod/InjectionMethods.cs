@@ -8,7 +8,6 @@ using Kolibri.Lib;
 using Mono.Cecil.Inject;
 using UnityEngine;
 using Object = UnityEngine.Object;
-using Random = UnityEngine.Random;
 
 namespace AudioMod
 {
@@ -17,18 +16,17 @@ namespace AudioMod
     /// </summary>
     public class InjectionMethods
     {
+        public static readonly ManagerWrapper CurrentManagerWrapper = new ManagerWrapper();
+
         /// <summary>
         /// Spawns the MusicController object in the TAH scene
         /// </summary>
         /// <param name="manager">The manager for the game</param>
-        [InjectMethod(typeof(TAH_Manager), nameof(TAH_Manager.BeginGame), MethodInjectionInfo.MethodInjectionLocation.Bottom, InjectFlags.PassInvokingInstance)]
-        public static void AddMusicController(TAH_Manager manager)
+        [InjectMethod(typeof(TNH_Manager), "InitBeginningEquipment", MethodInjectionInfo.MethodInjectionLocation.Bottom, InjectFlags.PassInvokingInstance)]
+        public static void AddMusicControllerTNH(TNH_Manager manager)
         {
             try
             {
-                //Because unity sucks, we need to get an instance of an object to use Object.Instantiate ????
-                //To get the first instance we create a new GameObject and add a MusicController as a component
-                //Using this component as an "original" instance, we can use Object.Instantiate to spawn in the object
                 var gm = new GameObject();
                 var mci = gm.AddComponent<MusicController>();
                 var musicController = Object.Instantiate(mci.GameObject, GM.CurrentPlayerBody.Head.transform.position, GM.CurrentPlayerBody.Head.transform.rotation);
@@ -43,6 +41,31 @@ namespace AudioMod
             }
 
         }
+
+        /// <summary>
+        /// Spawns the MusicController object in the TAH scene
+        /// </summary>
+        /// <param name="manager">The manager for the game</param>
+        [InjectMethod(typeof(TAH_Manager), nameof(TAH_Manager.BeginGame), MethodInjectionInfo.MethodInjectionLocation.Bottom, InjectFlags.PassInvokingInstance)]
+        public static void AddMusicControllerOldTAH(TAH_Manager manager)
+        {
+            try
+            {
+                var gm = new GameObject();
+                var mci = gm.AddComponent<MusicController>();
+                var musicController = Object.Instantiate(mci.GameObject, GM.CurrentPlayerBody.Head.transform.position, GM.CurrentPlayerBody.Head.transform.rotation);
+                manager.AddObjectToTrackedList(musicController);
+                //Destroy the original gameobject
+                Object.Destroy(gm);
+            }
+            catch (Exception e)
+            {
+                Logger.Log(e);
+                Application.Quit();
+            }
+
+        }
+
         /// <summary>
         /// Changes the music playing during the Meatmas scene to one specified by the config file
         /// </summary>
@@ -74,7 +97,36 @@ namespace AudioMod
         {
             try
             {
-                
+                CurrentManagerWrapper.CurrentManager = manager;
+                //This is needed for BASS
+                Assembly.Load("System.Windows.Forms");
+
+                //Add the needed components
+                var audioMod = manager.gameObject.AddComponent<AudioModComponent>();
+                manager.gameObject.AddComponent<AudioCrossFade>();
+
+                audioMod.Manager = manager;
+
+                audioMod.Init();
+                audioMod.SilenceDefaultMusic();
+            }
+            catch (Exception e)
+            {
+                Logger.Log(e);
+                Application.Quit();
+            }
+        }
+        
+        /// <summary>
+        /// Injected into the top of TAH_Manager.BeginGame, used to load music, silence FMOD music, and add components for later use
+        /// </summary>
+        /// <param name="manager">The manager we are injecting into</param>
+        [InjectMethod(typeof(TNH_Manager), "InitBeginningEquipment", MethodInjectionInfo.MethodInjectionLocation.Bottom, InjectFlags.PassInvokingInstance)]
+        public static void BeginGameInjectNewTakeAndHold(TNH_Manager manager)
+        {
+            try
+            {
+                CurrentManagerWrapper.CurrentManager = manager;
                 //This is needed for BASS
                 Assembly.Load("System.Windows.Forms");
 
@@ -103,7 +155,8 @@ namespace AudioMod
         {
             try
             {
-                var audioModComponent = GM.TAHMaster.GetComponent<AudioModComponent>();
+                var audioModComponent = CurrentManagerWrapper.CurrentManager.GetComponent<AudioModComponent>();
+                
                 switch (musicIndex)
                 {
                     case 1:
@@ -119,30 +172,6 @@ namespace AudioMod
             {
                 Logger.Log(e);
                 Application.Quit();
-            }
-        }
-
-        [InjectMethod(typeof(TAH_Manager), "InitiateHold", MethodInjectionInfo.MethodInjectionLocation.Top, InjectFlags.PassInvokingInstance)]
-        public static void AdjustDifficulty(TAH_Manager manager)
-        {
-            foreach (var waveDefinition in manager.WaveDefinitions)
-            {
-                waveDefinition.TimeForWave = 5f;
-                waveDefinition.NumBots = 4;
-                waveDefinition.WarmUpToSpawnTime = 2f;
-            }
-        }
-
-        [InjectMethod(typeof(TAH_Manager), "SpawnBot", MethodInjectionInfo.MethodInjectionLocation.Bottom)]
-        public static void GetBotInfo()
-        {
-            if (GM.TAHMaster.State == TAH_Manager.TAHGameState.Holding)
-            {
-                var bot = GM.CurrentSceneSettings.ShotEventReceivers.Last().GetComponent<wwBotWurst>();
-                
-                bot.LastPlaceTargetSeen = GM.CurrentPlayerBody.transform.position;
-                bot.SetField("m_timeSinceTargetSeen", 0f);
-                bot.State = wwBotWurst.BotState.Searching;
             }
         }
     }

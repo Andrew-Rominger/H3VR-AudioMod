@@ -1,20 +1,18 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using VideoLibrary;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Enums;
+using YoutubeExplode;
+using YoutubeExplode.Models.MediaStreams;
 
 namespace YoutubeHelper
 {
     class Program
     {
+        private static readonly IYoutubeClient _client = new YoutubeClient();
         static async Task Main(string[] args)
         {
-            //Setup
-            var youTube = YouTube.Default;
-            Console.Write("Downloading FFmpeg...");
-            await FFmpeg.GetLatestVersion();
             Console.WriteLine("Done");
             var takeMusicDir = Directory.CreateDirectory("TakeMusic");
             var holdMusicDir = Directory.CreateDirectory("HoldMusic");
@@ -30,22 +28,7 @@ namespace YoutubeHelper
                 var outname = line.Split(null)[1];
                 var outputMp3File = new FileInfo(Path.Combine(takeMusicDir.FullName, outname + ".mp3"));
                 //Skip song if already downloaded
-                if (outputMp3File.Exists)
-                {
-                    Console.WriteLine($"\t{outname} already downloaded. Skipping...");
-                    continue;
-                }
-                Console.Write($"\t-Downloading {outname}...");
-                //Get video
-                var video = youTube.GetVideo(url);
-                var videoDownloadFile = Path.ChangeExtension(Path.GetTempFileName(), FileExtensions.Mp4);
-                //Write video to file
-                File.WriteAllBytes(videoDownloadFile, video.GetBytes());
-                Console.Write($"Done. Converting to mp3...");
-                //Extract mp3 from video
-                var result = await Conversion.ExtractAudio(videoDownloadFile, outputMp3File.FullName)
-                    .Start();
-                Console.WriteLine($"Done");
+                await DownloadMusic(url, outputMp3File);
             }
 
             Console.WriteLine("Downloading Hold Songs...");
@@ -54,24 +37,33 @@ namespace YoutubeHelper
                 var url = line.Split(null)[0];
                 var outname = line.Split(null)[1];
                 var outputMp3File = new FileInfo(Path.Combine(holdMusicDir.FullName, outname + ".mp3"));
-                if (outputMp3File.Exists)
-                {
-                    Console.WriteLine($"\t{outname} already downloaded. Skipping...");
-                    continue;
-                }
-                Console.Write($"\t-Downloading {outname}...");
-                var video = youTube.GetVideo(url);
-                string videoDownloadFile = Path.ChangeExtension(Path.GetTempFileName(), FileExtensions.Mp4);
-                File.WriteAllBytes(videoDownloadFile, video.GetBytes());
-                Console.Write($"Done. Converting to mp3...");
-
-                var result = await Conversion.ExtractAudio(videoDownloadFile, outputMp3File.FullName)
-                    .Start();
-
-                Console.WriteLine($"Done");
+                await DownloadMusic(url, outputMp3File);
             }
             Console.WriteLine("\nDone. Press any key to exit...");
             Console.Read();
+        }
+
+        public static async Task DownloadMusic(string url, FileInfo desinationFile)
+        {
+            if (desinationFile.Exists)
+            {
+                Console.WriteLine($"\t{desinationFile.Name} already downloaded. Skipping...");
+                return;
+            }
+            Console.Write($"\t-Downloading {desinationFile.Name}...");
+            //Get video
+            var vidId = YoutubeClient.ParseVideoId(url);
+            var streamInfo = await _client.GetVideoMediaStreamInfosAsync(vidId);
+            var stream = streamInfo.Audio.WithHighestBitrate();
+            var ext = stream.Container.GetFileExtension();
+            var videoDownloadFile = Path.ChangeExtension(Path.GetTempFileName(), ext);
+            await _client.DownloadMediaStreamAsync(stream, videoDownloadFile);
+            //Write video to file
+            Console.Write($"Done. Converting to mp3...");
+            //Extract mp3 from video
+            var result = await Conversion.Convert(videoDownloadFile, desinationFile.FullName)
+                .Start();
+            Console.WriteLine($"Done");
         }
     }
 }

@@ -14,11 +14,11 @@ namespace AudioMod
     public class LocalMusicPlayer : IMusicPlayer
     {
         private static readonly Random Rand = new Random();
-        private readonly TAH_Manager _manager;
+        private readonly MonoBehaviour _manager;
         private AudioClip[] _takeMusic;
         private AudioClip[] _holdMusic;
         private AudioCrossFade _audioCrossFade;
-        public LocalMusicPlayer(TAH_Manager manager)
+        public LocalMusicPlayer(MonoBehaviour manager)
         {
             _manager = manager;
             _audioCrossFade = _manager.gameObject.GetComponent<AudioCrossFade>();
@@ -31,31 +31,17 @@ namespace AudioMod
             //Get audio crossfader and random audio clip
             var musicSource = _manager.gameObject.GetComponent<AudioCrossFade>();
             var toPlay = GetRandomAudioClip(_takeMusic);
-
             //Check if the clip has a start time offset
-            if (ModConfig.Instance.MusicOffsets.ContainsKey(toPlay.name))
-            {
-                musicSource.CrossFade(toPlay, ModConfig.Instance.ConfigFile.Volume, ModConfig.Instance.ConfigFile.TakeMusicFadeTime, 0, ModConfig.Instance.MusicOffsets[toPlay.name]);
-            }
-            else
-            {
-                musicSource.CrossFade(toPlay, ModConfig.Instance.ConfigFile.Volume, ModConfig.Instance.ConfigFile.TakeMusicFadeTime);
-            }
+            CrossFadeToClip(musicSource, toPlay, ModConfig.Instance.ConfigFile.TakeMusicFadeTime);
         }
 
         /// <inheritdoc />
         public void PlayHoldMusic()
         {
             var musicSource = _manager.gameObject.GetComponent<AudioCrossFade>();
-            var holdClip = GetRandomAudioClip(_holdMusic);
-            if (ModConfig.Instance.MusicOffsets.ContainsKey(holdClip.name))
-            {
-                musicSource.CrossFade(holdClip, ModConfig.Instance.ConfigFile.Volume, ModConfig.Instance.ConfigFile.TakeMusicFadeTime, 0, ModConfig.Instance.MusicOffsets[holdClip.name]);
-            }
-            else
-            {
-                musicSource.CrossFade(holdClip, ModConfig.Instance.ConfigFile.Volume, ModConfig.Instance.ConfigFile.TakeMusicFadeTime);
-            }
+
+            var toPlay = GetRandomAudioClip(_holdMusic);
+            CrossFadeToClip(musicSource, toPlay, ModConfig.Instance.ConfigFile.HoldMusicFadeTime);
         }
 
         /// <inheritdoc />
@@ -63,7 +49,7 @@ namespace AudioMod
         {
             //Get audio crossfader
             var musicSource = _manager.gameObject.GetComponent<AudioCrossFade>();
-
+           
             AudioClip toPlay;
             //If there are multiple songs available we need to pick a random one
             if (_takeMusic.Length > 1)
@@ -83,20 +69,13 @@ namespace AudioMod
                 toPlay = _takeMusic.First();
             }
 
-
-            if (ModConfig.Instance.MusicOffsets.ContainsKey(toPlay.name))
-            {
-                musicSource.CrossFade(toPlay, ModConfig.Instance.ConfigFile.Volume, 0, 0, ModConfig.Instance.MusicOffsets[toPlay.name]);
-            }
-            else
-            {
-                musicSource.CrossFade(toPlay, ModConfig.Instance.ConfigFile.Volume, 0);
-            }
+            CrossFadeToClip(musicSource, toPlay, ModConfig.Instance.ConfigFile.TakeMusicFadeTime);
         }
 
         /// <inheritdoc />
         public void SkipHoldMusic()
         {
+           
             var musicSource = _manager.gameObject.GetComponent<AudioCrossFade>();
             AudioClip toPlay;
             if (_holdMusic.Length > 1)
@@ -114,16 +93,7 @@ namespace AudioMod
             {
                 toPlay = _holdMusic.First();
             }
-
-
-            if (ModConfig.Instance.MusicOffsets.ContainsKey(toPlay.name))
-            {
-                musicSource.CrossFade(toPlay, ModConfig.Instance.ConfigFile.Volume, 0, 0, ModConfig.Instance.MusicOffsets[toPlay.name]);
-            }
-            else
-            {
-                musicSource.CrossFade(toPlay, ModConfig.Instance.ConfigFile.Volume, 0);
-            }
+            CrossFadeToClip(musicSource, toPlay, ModConfig.Instance.ConfigFile.HoldMusicFadeTime);
         }
 
         /// <inheritdoc />
@@ -131,9 +101,9 @@ namespace AudioMod
         {
             var musicSource = _manager.gameObject.GetComponent<AudioCrossFade>();
             musicSource.VolumeUp();
-            if (ModConfig.Instance.ConfigFile.Volume <= .9f)
-                ModConfig.Instance.ConfigFile.Volume += .1f;
-            else if (ModConfig.Instance.ConfigFile.Volume > .9f && ModConfig.Instance.ConfigFile.Volume < 1f)
+            if (ModConfig.Instance.ConfigFile.Volume <= (1.0f- AudioCrossFade.VolumeChangeAmount))
+                ModConfig.Instance.ConfigFile.Volume += AudioCrossFade.VolumeChangeAmount;
+            else if (ModConfig.Instance.ConfigFile.Volume > (1.0f - AudioCrossFade.VolumeChangeAmount) && ModConfig.Instance.ConfigFile.Volume < 1f)
                 ModConfig.Instance.ConfigFile.Volume = 1f;
         }
 
@@ -142,10 +112,23 @@ namespace AudioMod
         {
             var musicSource = _manager.gameObject.GetComponent<AudioCrossFade>();
             musicSource.VolumeDown();
-            if (ModConfig.Instance.ConfigFile.Volume >= .1f)
-                ModConfig.Instance.ConfigFile.Volume -= .1f;
-            else if (ModConfig.Instance.ConfigFile.Volume > 0f && ModConfig.Instance.ConfigFile.Volume < .1f)
+            if (ModConfig.Instance.ConfigFile.Volume >= AudioCrossFade.VolumeChangeAmount)
+                ModConfig.Instance.ConfigFile.Volume -= AudioCrossFade.VolumeChangeAmount;
+            else if (ModConfig.Instance.ConfigFile.Volume > 0f && ModConfig.Instance.ConfigFile.Volume < AudioCrossFade.VolumeChangeAmount)
                 ModConfig.Instance.ConfigFile.Volume = 0;
+        }
+
+        private void CrossFadeToClip(AudioCrossFade musicSource, AudioClip toPlay, float fadeTime)
+        {
+            var name = toPlay.name.Split('.')[0];
+            if (ModConfig.Instance.MusicOffsets?.ContainsKey(name) ?? false)
+            {
+                musicSource.CrossFade(toPlay, ModConfig.Instance.ConfigFile.Volume, fadeTime, 0, ModConfig.Instance.MusicOffsets[name]);
+            }
+            else
+            {
+                musicSource.CrossFade(toPlay, ModConfig.Instance.ConfigFile.Volume, 0);
+            }
         }
 
         /// <summary>
@@ -189,7 +172,6 @@ namespace AudioMod
                 var audioClipList = audioClips.Where(c => c != _audioCrossFade.CurrentSource.clip).ToList();
                 return audioClipList[Rand.Next(0, audioClipList.ToList().Count)];
             }
-
             return audioClips.First();
         }
     }

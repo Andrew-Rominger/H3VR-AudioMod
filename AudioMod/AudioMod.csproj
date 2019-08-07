@@ -11,7 +11,8 @@
     <AssemblyName>AudioMod</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -66,14 +67,14 @@
       <HintPath>C:\Repos\Kolibri\AudioMod\GameAssemblies\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.Networking">
-      <HintPath>GameAssemblies\UnityEngine.Networking.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>GameAssemblies\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VR">
       <HintPath>GameAssemblies\UnityEngine.VR.dll</HintPath>
+    </Reference>
+    <Reference Include="Valve.Newtonsoft.Json">
+      <HintPath>Assemblies\Valve.Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -85,6 +86,7 @@
     <Compile Include="InjectionMethods.cs" />
     <Compile Include="LocalMusicPlayer.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="ManagerWrapper.cs" />
     <Compile Include="MusicController.cs" />
     <Compile Include="ObjImporter.cs" />
     <Compile Include="StaticExtensions.cs" />
@@ -96,6 +98,7 @@
     <Content Include="Assemblies\Kolibri.Lib.dll" />
     <Content Include="Assemblies\Kolibri.Lib.pdb" />
     <Content Include="Assemblies\Mono.Cecil.Inject.dll" />
+    <Content Include="Assemblies\Valve.Newtonsoft.Json.dll" />
     <Content Include="GameAssemblies\Assembly-CSharp-firstpass.dll" />
     <Content Include="GameAssemblies\Assembly-CSharp.dll" />
     <Content Include="GameAssemblies\Put assembly-csharp, assembly-csharp-firstpass, and unityengine assemblies in here.txt" />
@@ -117,6 +120,12 @@
     <None Include="Model\SonyWalkman.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="PostBuildScript.csx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>"$(DevEnvDir)..\..\MSBuild\Current\Bin\Roslyn\csi.exe" PostBuildScript.csx</PostBuildEvent>
+  </PropertyGroup>
 </Project>

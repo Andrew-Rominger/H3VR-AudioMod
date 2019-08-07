@@ -15,6 +15,8 @@ namespace AudioMod
     /// </summary>
     public class AudioCrossFade : MonoBehaviour
     {
+        public const float VolumeChangeAmount = 0.05f;
+
         public AudioSource Source0;
         public AudioSource Source1;
         public bool IsSongOver;
@@ -50,12 +52,7 @@ namespace AudioMod
             if (Source0 == null || Source1 == null)
             {
                 //re-connect _soruce0 and _source1 to the ones in attachedSources[]
-                var attachedSources = gameObject.GetComponents(typeof(AudioSource));
-
-                //For some reason, unity doesn't accept "as AudioSource[]" casting. We would get
-                //'null' array instead if we would attempt. Need to re-create a new array:
-                var sources = attachedSources.Select(c => c as AudioSource).ToArray();
-
+                var sources = gameObject.GetComponents<AudioSource>();
                 InitSources(sources);
             }
             else if(!IsSongOver)
@@ -70,16 +67,17 @@ namespace AudioMod
         }
 
         //re-establishes references to audio sources on this game object:
-        private void InitSources(IList<AudioSource> audioSources)
+        private void InitSources(AudioSource[] audioSources)
         {
-            if (ReferenceEquals(audioSources, null) || audioSources.Count == 0)
+            if (audioSources == null || audioSources.Length == 0)
             {
                 Source0 = gameObject.AddComponent<AudioSource>();
+
                 Source1 = gameObject.AddComponent<AudioSource>();
+                
                 return;
             }
-
-            switch (audioSources.Count)
+            switch (audioSources.Length)
             {
                 case 1:
                     Source0 = audioSources[0];
@@ -90,6 +88,8 @@ namespace AudioMod
                     Source1 = audioSources[1];
                     break;
             }
+            Source0.name = "Source 0";
+            Source1.name = "Source 1";
         }
 
         #endregion
@@ -114,9 +114,9 @@ namespace AudioMod
         /// </summary>
         public void VolumeDown()
         {
-            if (CurrentSource.volume >= .01f)
-                CurrentSource.volume -= .01f;
-            else if (CurrentSource.volume > 0f && CurrentSource.volume < .01f)
+            if (CurrentSource.volume >= VolumeChangeAmount)
+                CurrentSource.volume -= VolumeChangeAmount;
+            else if (CurrentSource.volume < VolumeChangeAmount)
                 CurrentSource.volume = 0f;
         }
 
@@ -125,9 +125,9 @@ namespace AudioMod
         /// </summary>
         public void VolumeUp()
         {
-            if (CurrentSource.volume <= .99f)
-                CurrentSource.volume += .01f;
-            else if (CurrentSource.volume > .99f && CurrentSource.volume < 1f)
+            if (CurrentSource.volume <= (1.0f - VolumeChangeAmount))
+                CurrentSource.volume += VolumeChangeAmount;
+            else if (CurrentSource.volume > (1.0f - VolumeChangeAmount) && CurrentSource.volume < 1f)
                 CurrentSource.volume = 1f;
         }
 
@@ -145,11 +145,13 @@ namespace AudioMod
 
             if (_source0Playing)
             {
+                
                 // _source0 is currently playing the most recent AudioClip so launch on source1
                 Source1.clip = playMe;
-                Source1.time = timeSkip;
-                Source1.Play();
                 Source1.volume = 0;
+                Source1.Play();
+                Source1.time = timeSkip;
+                
 
                 //Stop if currently fading
                 if (_firstSourceFadeRoutine != null)
@@ -173,12 +175,13 @@ namespace AudioMod
                 yield break;
             }
 
+            
             //otherwise, Source1 is currently active, so play on Source0
             Source0.clip = playMe;
-            Source0.time = timeSkip;
-            Source0.Play();
-            
             Source0.volume = 0;
+            Source0.Play();
+            Source0.time = timeSkip;
+            
 
             if (_zerothSourceFadeRoutine != null)
             {

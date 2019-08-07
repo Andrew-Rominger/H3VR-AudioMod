@@ -1,7 +1,6 @@
 ﻿using FistVR;
 using FMOD.Studio;
 using UnityEngine;
-using Random = System.Random;
 
 namespace AudioMod
 {
@@ -10,7 +9,7 @@ namespace AudioMod
     /// </summary>
     public class AudioModComponent : MonoBehaviour
     {
-        public TAH_Manager Manager { get; set; }
+        public MonoBehaviour Manager { get; set; }
         public IMusicPlayer MusicPlayer { get; private set; }
         private AudioCrossFade _audioPlayer;
         public void Init()
@@ -26,23 +25,25 @@ namespace AudioMod
                 SongEnd();
             }
         }
+
         /// <summary>
         /// Called by the CrossFader when the current song ends
         /// </summary>
         public void SongEnd()
         {
-            if (GM.TAHMaster.State == TAH_Manager.TAHGameState.Taking)
+            if (InjectionMethods.CurrentManagerWrapper.GetState() == ManagerWrapper.State.Taking)
                 PlayTakeMusic();
             else
                 PlayHoldMusic();
         }
+
         /// <summary>
         /// Stops the game's default music from playing
         /// </summary>
         public void SilenceDefaultMusic()
         {
             //use reflection to get the FMODControllers bus and mute it
-            Manager.FMODController.GetField<Bus>("MasterBus").setMute(true);
+            Manager.GetComponent<FVRFMODController>().GetField<Bus>("MasterBus").setMute(true);
         }
 
         public void PlayHoldMusic()

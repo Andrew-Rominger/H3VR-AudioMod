@@ -5,18 +5,10 @@ namespace AudioMod
 {
     public class Logger
     {
-        private FileInfo _logFile = new FileInfo("LogFile.log");
-        private static Logger m_instance;
-        public static Logger Instance
-        {
-            get
-            {
-                if (m_instance == null)
-                    m_instance = new Logger();
-                return m_instance;
-            }
-
-        }
+        private const string logName = "AudioMod";
+        private FileInfo _logFile = new FileInfo($"LogFile_{logName}.log");
+        private static Logger _mInstance;
+        public static Logger Instance => _mInstance ?? (_mInstance = new Logger());
 
         public static void Log(Exception e)
         {
